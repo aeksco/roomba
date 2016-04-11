@@ -36,7 +36,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ###########################################################################
 
-from flask import Flask, render_template
+from flask import Flask, request, redirect, url_for, send_from_directory, json, Response
 import struct
 import sys, glob # for listing serial ports
 import serial
@@ -51,7 +51,7 @@ ROTATIONCHANGE = 300
 
 # # # # #
 
-class TetheredDriveApp():
+class TetheredRoomba():
     # static variables for keyboard callback -- I know, this is icky
     callbackKeyUp = False
     callbackKeyDown = False
@@ -60,10 +60,12 @@ class TetheredDriveApp():
     callbackKeyLastDriveCommand = ''
 
     def __init__(self):
-      print 'HELLO ROMMBA'
+      print 'HELLO ROOMBA'
 
     # sendCommandASCII takes a string of whitespace-separated, ASCII-encoded base 10 values to send
     def sendCommandASCII(self, command):
+        print 'Sending ASCII...'
+        print command
         cmd = ""
         for v in command.split():
             cmd += chr(int(v))
@@ -73,22 +75,18 @@ class TetheredDriveApp():
     # sendCommandRaw takes a string interpreted as a byte array
     def sendCommandRaw(self, command):
         global connection
-        print 'SEND COMMAND RAW'
+        print 'Sending raw command...'
 
         try:
             if connection is not None:
-                print "HAS CONNECTION"
-
                 connection.write(command)
             else:
-                # tkMessageBox.showerror('Not connected!', 'Not connected to a robot!')
                 print "Not connected."
         except serial.SerialException:
             print "Lost connection"
-            # tkMessageBox.showinfo('Uh-oh', "Lost connection to the robot!")
             connection = None
 
-        print ' '.join([ str(ord(c)) for c in command ])
+        # print ' '.join([ str(ord(c)) for c in command ])
         # self.text.insert(END, ' '.join([ str(ord(c)) for c in command ]))
         # self.text.insert(END, '\n')
         # self.text.see(END)
@@ -126,72 +124,6 @@ class TetheredDriveApp():
     def get16Signed(self):
         return getDecodedBytes(2, ">h")
 
-    # A handler for keyboard events. Feel free to add more!
-    # def callbackKey(self, event):
-    #     k = event.keysym.upper()
-    #     motionChange = False
-
-    #     if event.type == '2': # KeyPress; need to figure out how to get constant
-    #         if k == 'P':   # Passive
-    #             self.sendCommandASCII('128')
-    #         elif k == 'S': # Safe
-    #             self.sendCommandASCII('131')
-    #         elif k == 'F': # Full
-    #             self.sendCommandASCII('132')
-    #         elif k == 'C': # Clean
-    #             self.sendCommandASCII('135')
-    #         elif k == 'D': # Dock
-    #             self.sendCommandASCII('143')
-    #         elif k == 'SPACE': # Beep
-    #             self.sendCommandASCII('140 3 1 64 16 141 3')
-    #         elif k == 'R': # Reset
-    #             self.sendCommandASCII('7')
-    #         elif k == 'UP':
-    #             self.callbackKeyUp = True
-    #             motionChange = True
-    #         elif k == 'DOWN':
-    #             self.callbackKeyDown = True
-    #             motionChange = True
-    #         elif k == 'LEFT':
-    #             self.callbackKeyLeft = True
-    #             motionChange = True
-    #         elif k == 'RIGHT':
-    #             self.callbackKeyRight = True
-    #             motionChange = True
-    #         else:
-    #             print repr(k), "not handled"
-    #     elif event.type == '3': # KeyRelease; need to figure out how to get constant
-    #         if k == 'UP':
-    #             self.callbackKeyUp = False
-    #             motionChange = True
-    #         elif k == 'DOWN':
-    #             self.callbackKeyDown = False
-    #             motionChange = True
-    #         elif k == 'LEFT':
-    #             self.callbackKeyLeft = False
-    #             motionChange = True
-    #         elif k == 'RIGHT':
-    #             self.callbackKeyRight = False
-    #             motionChange = True
-
-    #     if motionChange == True:
-    #         velocity = 0
-    #         velocity += VELOCITYCHANGE if self.callbackKeyUp is True else 0
-    #         velocity -= VELOCITYCHANGE if self.callbackKeyDown is True else 0
-    #         rotation = 0
-    #         rotation += ROTATIONCHANGE if self.callbackKeyLeft is True else 0
-    #         rotation -= ROTATIONCHANGE if self.callbackKeyRight is True else 0
-
-    #         # compute left and right wheel velocities
-    #         vr = velocity + (rotation/2)
-    #         vl = velocity - (rotation/2)
-
-    #         # create drive command
-    #         cmd = struct.pack(">Bhh", 145, vr, vl)
-    #         if cmd != self.callbackKeyLastDriveCommand:
-    #             self.sendCommandRaw(cmd)
-    #             self.callbackKeyLastDriveCommand = cmd
-
     def onConnect(self):
         global connection
 
@@ -202,6 +134,7 @@ class TetheredDriveApp():
 
         try:
             ports = self.getSerialPorts()
+            print ports
             # port = tkSimpleDialog.askstring('Port?', 'Enter COM port to open.\nAvailable options:\n' + '\n'.join(ports))
             port = ports[1]
             print "GOT PORT"
@@ -252,36 +185,77 @@ class TetheredDriveApp():
                 pass
         return result
 
-    def ensureSafe(self):
-      # Passive
-      self.sendCommandASCII('128')
-      # Safe
-      self.sendCommandASCII('131')
+    # # # # #
 
-    def clean(self):
-      self.ensureSafe()
-      self.sendCommandASCII('135') # Clean
+    def ensureConnection(self):
+      self.onConnect()
+
+    def ensureSafe(self):
+      self.sendCommandASCII('128') # Passive
+      self.sendCommandASCII('131') # Safe
+
+    # # # # #
+
+    def getActionAscii(self, action):
+      actions = { # TODO - make this global.
+        'clean':  '135',
+        'dock':   '143',
+        'reset':  '7',
+        'full':   '132'
+      }
+
+      # NOTE - beep doesn't work
+      # 'beep':   '140 3 64 16 141 3',
+
+      return actions[action]
+
+    # # # # #
+
+    def sendAction(self, action):
+      command = self.getActionAscii(action)
+
+      self.ensureConnection()
+      # self.ensureSafe()
+      self.sendCommandASCII('128') # Passive
+      self.sendCommandASCII('131') # Safe
+      # self.sendCommandASCII('135')
+      self.sendCommandASCII(command)
+      return { 'sent': 'true' }
 
 # # # # # # # # # # # # # # # # # # # #
 
-app     = Flask(__name__)
-roomba  = TetheredDriveApp()
+# Init server & Roomba instance
+app     = Flask(__name__, static_folder='build')
+roomba  = TetheredRoomba()
 
-# Connect route
+# Static asset routes
 @app.route('/')
-def index():
-  return render_template('index.html')
-  # ports = roomba.getSerialPorts()
-  # return 'Hello world'
+def root():
+  return send_from_directory('build', 'index.html')
 
-# Clean route
-@app.route('/clean')
-def clean():
-  # ports = roomba.getSerialPorts()
-  # roomba.onConnect()
-  roomba.onConnect()
-  roomba.clean()
-  return 'Clean!'
+@app.route('/js/<path:path>')
+def sendJS(path):
+  return send_from_directory('build/js/', path)
+
+@app.route('/css/<path:path>')
+def sendCss(path):
+  return send_from_directory('build/css/', path)
+
+# # # # #
+
+# Response handler
+def sendResponse(state, status=200):
+  return Response(json.dumps(state), status=status, mimetype='application/json')
+
+# Roomba API
+@app.route('/roomba')
+def invokeAction():
+  if 'action' in request.args:
+    return sendResponse(roomba.sendAction(request.args['action']))
+
+  return sendResponse({ 'error': 'no state' }, 400)
+
+# # # # #
 
 # Start
 if __name__ == '__main__':

@@ -1,8 +1,41 @@
+# # # # #
 
-class ExampleView extends Marionette.ItemView
+class Roomba extends Backbone.Model
+  urlRoot: 'roomba'
+
+  sendAction: (action) ->
+    @fetch({ data: { action: action } })
+
+# # # # #
+
+class RoombaController extends Marionette.ItemView
   template: require './templates/example'
 
-  onShow: ->
-    console.log 'You can put some Javascript to run in this view.'
+  ui:
+    action: '[data-click=action]'
 
-module.exports = ExampleView
+  events:
+    'click @ui.action': 'invokeAction'
+
+  modelEvents:
+    'sync':   'onSync'
+    'error':  'onError'
+
+  onSync: ->
+    # console.log 'SYNCED'
+
+  onError: ->
+    # console.log 'ON ERROR'
+
+  initialize: ->
+    @model = new Roomba()
+
+  invokeAction: (e) ->
+    e.preventDefault()
+    el = @$(e.currentTarget)
+    action = @$(e.currentTarget).data().action
+    @model.sendAction(action)
+
+# # # # #
+
+module.exports = RoombaController

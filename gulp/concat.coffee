@@ -16,6 +16,7 @@ gulp.task 'concat', ->
       paths.components + 'backbone.babysitter/lib/backbone.babysitter.js',
       paths.components + 'backbone.wreqr/lib/backbone.wreqr.js',
       paths.components + 'backbone.marionette/lib/core/backbone.marionette.js',
+      paths.components + 'tether/dist/js/tether.min.js',
       paths.components + 'bootstrap/dist/js/bootstrap.min.js'
     ])
     .pipe plumber()

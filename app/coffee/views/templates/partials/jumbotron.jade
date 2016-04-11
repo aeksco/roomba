@@ -1,8 +1,19 @@
-// Main jumbotron for a primary marketing message or call to action
 .jumbotron
   .container
-    h1 Hello, world!
-    p
-      | This is a template for a simple marketing or informational website. It includes a large callout called a jumbotron and three supporting pieces of content. Use it as a starting point to create something more unique.
-    p
-      a.btn.btn-primary.btn-lg(href='#', role='button') Learn more »
+    h1 Roomba Web Client
+
+    - colCss = 'col-xs-3'
+    - btnCss = 'btn btn-primary btn-lg w-100'
+
+    .row
+      div(class=colCss)
+        a( href='#' class=btnCss data-click='action' data-action='clean' ) Clean
+
+      div(class=colCss)
+        a( href='#' class=btnCss data-click='action' data-action='dock' ) Dock
+
+      div(class=colCss)
+        a( href='#' class=btnCss data-click='action' data-action='full' ) Full
+
+      div(class=colCss)
+        a( href='#' class=btnCss data-click='action' data-action='reset' ) Reset
