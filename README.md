@@ -1,8 +1,6 @@
-# Bootstrap 4 Alpha Sandbox
+# Roomba
 
-Bootstrap 4 sandbox built with Jade, SASS, Browserify, and Gulp.
-
-Includes LiveReload for automatic page refresh when changes are detected in ```.jade```, ```.sass```, and ```.coffee``` files.
+Roomba web client built with Flask & Backbone.
 
 **Usage:**
 
@@ -13,10 +11,6 @@ Includes LiveReload for automatic page refresh when changes are detected in ```.
 - ```bower install```
 
 - run ```gulp``` to start LiveReload server
-
-- Open browser to ```localhost:8080```
-
-If you add an additional file, you will likely need to restart the Gulp LiveReload server for new changes to be detected.
 
 **Built with:**
 
@@ -29,8 +23,6 @@ If you add an additional file, you will likely need to restart the Gulp LiveRelo
 - [BS4 (Alpha)](http://v4-alpha.getbootstrap.com/)
 
 - [Font-Awesome](http://fortawesome.github.io/Font-Awesome/icons/)
-
-**Includes (unused):**
 
 - [Underscore.js](http://underscorejs.org/)
 

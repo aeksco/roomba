@@ -1,15 +1,10 @@
 
-# Configuration
-Layout = require './config/layout'
-
 # # # # #
 
 # Import Views
-ExampleView = require './views/example'
+AppLayout = require './views/layout'
+RoombaView = require './views/roomba'
 
 # # # # #
 
-$(document).on 'ready', =>
-  console.log 'Document Ready'
-
-  Layout.show new ExampleView()
+$(document).on 'ready', => Layout.show new RoombaView()

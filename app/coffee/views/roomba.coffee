@@ -8,8 +8,8 @@ class Roomba extends Backbone.Model
 
 # # # # #
 
-class RoombaController extends Marionette.ItemView
-  template: require './templates/example'
+class RoombaView extends Marionette.LayoutView
+  template: require './templates/roomba'
 
   ui:
     action: '[data-click=action]'
@@ -38,4 +38,4 @@ class RoombaController extends Marionette.ItemView
 
 # # # # #
 
-module.exports = RoombaController
+module.exports = RoombaView
