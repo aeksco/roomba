@@ -7,4 +7,4 @@ RoombaView = require './views/roomba'
 
 # # # # #
 
-$(document).on 'ready', => Layout.show new RoombaView()
+$(document).on 'ready', => AppLayout.show new RoombaView()

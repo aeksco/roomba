@@ -29,3 +29,8 @@ Roomba web client built with Flask & Backbone.
 - [Backbone.js](http://backbonejs.org/)
 
 - [Marionette.js](http://marionettejs.com/)
+
+
+**Helpful:**
+
+[Automatically connect raspberry pi to WiFi network](http://weworkweplay.com/play/automatically-connect-a-raspberry-pi-to-a-wifi-network/)

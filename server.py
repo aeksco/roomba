@@ -93,7 +93,10 @@ class TetheredRoomba():
 
         try:
             ports = self.getSerialPorts()
-            port = ports[1] # TODO - Lazily grabs first available port
+
+            # TODO - Lazily grabs first available port
+            # Add connectionManager to handle listing
+            port = ports[1]
             # port = tkSimpleDialog.askstring('Port?', 'Enter COM port to open.\nAvailable options:\n' + '\n'.join(ports))
 
         except EnvironmentError:
@@ -138,7 +141,7 @@ class TetheredRoomba():
             try:
                 s = serial.Serial(port)
                 s.close()
-                result.append(port)
+                result.append({ 'name': port })
             except (OSError, serial.SerialException):
                 pass
         return result
@@ -200,13 +203,16 @@ def sendCss(path):
 def sendResponse(state, status=200):
   return Response(json.dumps(state), status=status, mimetype='application/json')
 
-# Roomba API
 @app.route('/roomba')
 def invokeAction():
   if 'action' in request.args:
     return sendResponse(roomba.sendAction(request.args['action']))
 
   return sendResponse({ 'error': 'no state' }, 400)
+
+@app.route('/serial_ports')
+def getSerialPorts():
+  return sendResponse(roomba.getSerialPorts(), 200)
 
 # # # # #
 

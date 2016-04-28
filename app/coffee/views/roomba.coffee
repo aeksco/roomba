@@ -1,5 +1,13 @@
 # # # # #
 
+# class SerialPort extends Backbone.Model
+
+# class SerialPorts extends Backbone.Collection
+#   model: SerialPort
+#   url: '/serial_ports'
+
+# # # # #
+
 class Roomba extends Backbone.Model
   urlRoot: 'roomba'
 
@@ -29,6 +37,8 @@ class RoombaView extends Marionette.LayoutView
 
   initialize: ->
     @model = new Roomba()
+    # @collection = new SerialPorts()
+    # @collection.fetch()
 
   invokeAction: (e) ->
     e.preventDefault()

@@ -2,4 +2,4 @@
 require('coffee-script/register');
 
 // Bootstraps Gulp's main file
-require('./Gulpfile.coffee');
+require('./gulp/Gulpfile.coffee');

@@ -5,18 +5,18 @@ webserver   = require 'gulp-webserver'
 plumber     = require 'gulp-plumber'
 
 # Import Paths
-paths = require './gulp/paths.coffee'
+paths = require './paths.coffee'
 
 # Environments -> 'development' || 'production'
 environment = 'development'
 gulp.task 'set-production', -> environment = 'production'
 
 # Import tasks
-require './gulp/coffee.coffee'
-require './gulp/copy.coffee'
-require './gulp/concat.coffee'
-require './gulp/sass.coffee'
-require './gulp/jade.coffee'
+require './coffee.coffee'
+require './copy.coffee'
+require './concat.coffee'
+require './sass.coffee'
+require './jade.coffee'
 
 # Webserver Task
 gulp.task 'webserver', ->
